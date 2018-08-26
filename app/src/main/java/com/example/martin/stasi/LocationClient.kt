@@ -5,12 +5,14 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 
-class LocationClient {
+
+
+class LocationClient(val url: String) {
     fun getClient(): LocationService {
         val httpClient = OkHttpClient.Builder()
 
         val builder = Retrofit.Builder()
-                .baseUrl("http://localhost:4040")
+                .baseUrl(url)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
 

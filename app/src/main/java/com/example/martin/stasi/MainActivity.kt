@@ -38,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
         setupPusher()
         fab.setOnClickListener { view ->
+            println("Clicking the fab")
             if (checkLocationPermission())
                 sendLocation()
         }
@@ -61,7 +62,8 @@ class MainActivity : AppCompatActivity() {
 
                         val body = RequestBody.create(MediaType.parse("application/json"), jsonObject.toString())
                         Log.e("TAG",jsonObject.toString())
-                        LocationClient().getClient().sendLocation(body).enqueue(object: Callback<String> {
+                        println(getUrl())
+                        LocationClient(getUrl()).getClient().sendLocation(body).enqueue(object: Callback<String> {
                             override fun onResponse(call: Call<String>, response: Response<String>) {}
 
                             override fun onFailure(call: Call<String>?, t: Throwable) {
@@ -78,6 +80,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkLocationPermission(): Boolean {
+        println("checking permissions")
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -87,7 +90,9 @@ class MainActivity : AppCompatActivity() {
             return true
         }
     }
-    private fun askForPermission():Unit {
+
+    private fun askForPermission() {
+        println("asking for permissions")
         // Should we show an explanation?
         if (ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -126,16 +131,17 @@ class MainActivity : AppCompatActivity() {
                         sendLocation()
                     }
                 } else {
-                    // permission denied!
+                    println("Permission denied!")
                 }
                 return
             }
         }
     }
+
     private fun setupPusher() {
         val options = PusherOptions()
         options.setCluster("eu")
-        pusher = Pusher("602f4fbd93a329552c58", options)
+        pusher = Pusher(getString(R.string.PUSHER_API_TOKEN), options)
         val channel = pusher.subscribe("feed")
         channel.bind("location") { _, _, data ->
             val jsonObject = JSONObject(data)
@@ -149,6 +155,11 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
+    private fun getUrl(): String {
+        return "${getString(R.string.LOCAL_PUSHER_URL)}:${getString(R.string.LOCAL_PUSHER_PORT)}"
+    }
+
     override fun onStart() {
         super.onStart()
         pusher.connect()
